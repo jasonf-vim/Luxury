@@ -16,6 +16,7 @@
         <module>eureka</module>
         <module>common</module>
         <module>common-db</module>
+        <module>canal</module>
     </modules>
 
     <parent>

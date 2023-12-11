@@ -1,4 +1,4 @@
-package com.jasonf.goods;
+package com.jasonf;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,9 +7,9 @@ import tk.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
 @EnableEurekaClient
-@MapperScan(basePackages = "com.jasonf.goods.dao")
-public class GoodsApplication {
+@MapperScan(basePackages = {"com.jasonf.order.dao"})
+public class OrderApplication {
     public static void main(String[] args) {
-        SpringApplication.run(GoodsApplication.class, args);
+        SpringApplication.run(OrderApplication.class);
     }
 }

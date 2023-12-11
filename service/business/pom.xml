@@ -3,22 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>Luxury</artifactId>
+        <artifactId>service</artifactId>
         <groupId>com.jasonf</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>service-api</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>goods-api</module>
-        <module>business-api</module>
-        <module>config-api</module>
-        <module>order-api</module>
-        <module>system-api</module>
-        <module>user-api</module>
-    </modules>
+    <artifactId>business</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -27,21 +18,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <scope>provided</scope>
+            <groupId>com.jasonf</groupId>
+            <artifactId>common-db</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>persistence-api</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jasonf</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>business-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
 </project>
