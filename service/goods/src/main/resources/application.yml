@@ -28,3 +28,6 @@ hystrix:
           enabled: true
         isolation:
           strategy: SEMAPHORE
+
+workerId: 3
+dataCenterId: 5

@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.jasonf.entity.PageResult;
 import com.jasonf.entity.Result;
 import com.jasonf.entity.StatusCode;
+import com.jasonf.goods.pojo.Goods;
 import com.jasonf.goods.pojo.Spu;
 import com.jasonf.goods.service.SpuService;
 import org.springframework.web.bind.annotation.*;
@@ -37,33 +38,32 @@ public class SpuController {
      */
     @GetMapping("/{id}")
     public Result findById(@PathVariable String id) {
-        Spu spu = spuService.findById(id);
-        return new Result(true, StatusCode.OK, "查询成功", spu);
+        Goods goods = spuService.findById(id);
+        return new Result(true, StatusCode.OK, "查询成功", goods);
     }
 
 
     /***
      * 新增数据
-     * @param spu
+     * @param goods
      * @return
      */
     @PostMapping
-    public Result add(@RequestBody Spu spu) {
-        spuService.add(spu);
+    public Result add(@RequestBody Goods goods) {
+        spuService.add(goods);
         return new Result(true, StatusCode.OK, "添加成功");
     }
 
 
     /***
      * 修改数据
-     * @param spu
+     * @param goods
      * @param id
      * @return
      */
     @PutMapping(value = "/{id}")
-    public Result update(@RequestBody Spu spu, @PathVariable String id) {
-        spu.setId(id);
-        spuService.update(spu);
+    public Result update(@RequestBody Goods goods, @PathVariable String id) {
+        spuService.update(goods);
         return new Result(true, StatusCode.OK, "修改成功");
     }
 
@@ -103,5 +103,35 @@ public class SpuController {
         Page<Spu> pageList = spuService.findPage(searchMap, page, size);
         PageResult pageResult = new PageResult(pageList.getTotal(), pageList.getResult());
         return new Result(true, StatusCode.OK, "查询成功", pageResult);
+    }
+
+    @PutMapping("audit/{id}")
+    public Result audit(@PathVariable String id) {
+        spuService.audit(id);
+        return new Result(true, StatusCode.OK, "审核通过");
+    }
+
+    @PutMapping("pull/{id}")
+    public Result pull(@PathVariable String id) {
+        spuService.pull(id);
+        return new Result(true, StatusCode.OK, "下架成功");
+    }
+
+    @PutMapping("put/{id}")
+    public Result put(@PathVariable String id) {
+        spuService.put(id);
+        return new Result(true, StatusCode.OK, "上架成功");
+    }
+
+    @PutMapping("restore/{id}")
+    public Result restore(@PathVariable String id) {
+        spuService.restore(id);
+        return new Result(true, StatusCode.OK, "还原成功");
+    }
+
+    @DeleteMapping("realDelete/{id}")
+    public Result realDelete(@PathVariable String id) {
+        spuService.realDelete(id);
+        return new Result(true, StatusCode.OK, "删除成功");
     }
 }
