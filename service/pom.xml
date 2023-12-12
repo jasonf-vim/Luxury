@@ -18,6 +18,7 @@
         <module>order</module>
         <module>system</module>
         <module>user</module>
+        <module>file</module>
     </modules>
 
     <properties>

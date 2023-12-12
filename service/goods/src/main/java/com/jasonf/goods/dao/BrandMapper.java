@@ -11,5 +11,5 @@ import java.util.Map;
 public interface BrandMapper extends Mapper<Brand> {
     //根据分类名称查询品牌
     @Select("SELECT NAME,image FROM tb_brand WHERE id IN ( SELECT brand_id FROM tb_category_brand WHERE category_id IN ( SELECT id FROM tb_category WHERE NAME = #{categoryName} ) ) order by seq")
-    public List<Map> findByCategoryName(@Param("categoryName") String categoryName);
+    List<Map> findByCategoryName(@Param("categoryName") String categoryName);
 }
