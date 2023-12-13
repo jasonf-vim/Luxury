@@ -9,6 +9,7 @@ import com.jasonf.goods.service.SkuService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,5 +104,15 @@ public class SkuController {
         Page<Sku> pageList = skuService.findPage(searchMap, page, size);
         PageResult pageResult = new PageResult(pageList.getTotal(), pageList.getResult());
         return new Result(true, StatusCode.OK, "查询成功", pageResult);
+    }
+
+    @GetMapping("spu/{spuId}")
+    public List<Sku> findSkuListBySpuId(@PathVariable("spuId") String spuId) {
+        Map<String, Object> condition = new HashMap<>();
+        condition.put("status", "1");   // 正常状态
+        if (!"all".equals(spuId)) {
+            condition.put("spuId", spuId);
+        }   // 非初始入库
+        return skuService.findList(condition);
     }
 }

@@ -18,6 +18,7 @@
         <module>order-api</module>
         <module>system-api</module>
         <module>user-api</module>
+        <module>search-api</module>
     </modules>
 
     <properties>

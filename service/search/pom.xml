@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>business</artifactId>
+    <artifactId>search</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -17,31 +17,38 @@
     </properties>
 
     <dependencies>
+        <!--公共包-->
         <dependency>
             <groupId>com.jasonf</groupId>
-            <artifactId>common-db</artifactId>
+            <artifactId>common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!--注册中心-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+        <!--spring boot 与es 结合包-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+        <!--商品实体类-->
         <dependency>
             <groupId>com.jasonf</groupId>
-            <artifactId>business-api</artifactId>
+            <artifactId>goods-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- mq依赖 -->
+        <!--搜索实体类-->
+        <dependency>
+            <groupId>com.jasonf</groupId>
+            <artifactId>search-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--rabbitmq依赖-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
-        <!-- http客户端 -->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.9.0</version>
-        </dependency>
-
     </dependencies>
 </project>
