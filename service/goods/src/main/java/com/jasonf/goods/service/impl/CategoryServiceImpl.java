@@ -111,6 +111,11 @@ public class CategoryServiceImpl implements CategoryService {
         return (Page<Category>) categoryMapper.selectByExample(example);
     }
 
+    @Override
+    public Category findCategoryById(Integer id) {
+        return categoryMapper.selectByPrimaryKey(id);
+    }
+
     /**
      * 构建查询对象
      *

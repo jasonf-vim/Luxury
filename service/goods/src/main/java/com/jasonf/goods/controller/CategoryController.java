@@ -41,6 +41,11 @@ public class CategoryController {
         return new Result(true, StatusCode.OK, "查询成功", category);
     }
 
+    @GetMapping("findCategoryById/{id}")
+    public Category findCategoryById(@PathVariable Integer id) {
+        return categoryService.findCategoryById(id);
+    }
+
 
     /***
      * 新增数据

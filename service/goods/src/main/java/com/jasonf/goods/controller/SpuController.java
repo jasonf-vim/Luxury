@@ -42,6 +42,11 @@ public class SpuController {
         return new Result(true, StatusCode.OK, "查询成功", goods);
     }
 
+    @GetMapping("findSpuById/{id}")
+    public Spu findSpuById(@PathVariable String id) {
+        return spuService.findSpuById(id);
+    }
+
 
     /***
      * 新增数据

@@ -138,6 +138,9 @@ public class SearchServiceImpl implements SearchService {
         StringTerms specStringTerms = (StringTerms) skuInfos.getAggregation(specTerms);
         List<String> specs = specStringTerms.getBuckets().stream().map(bucket -> bucket.getKeyAsString()).collect(Collectors.toList());
         resultMap.put("specs", specs);
+
+        resultMap.put("pageNum", pageNum);
+        resultMap.put("pageSize", pageSize);
         return resultMap;
     }
 }

@@ -105,4 +105,11 @@ public interface SpuService {
      * @param id
      */
     void realDelete(String id);
+
+    /**
+     * 页面服务查询spu信息
+     * @param id
+     * @return
+     */
+    Spu findSpuById(String id);
 }

@@ -20,6 +20,7 @@
         <module>user</module>
         <module>file</module>
         <module>search</module>
+        <module>page</module>
     </modules>
 
     <properties>
