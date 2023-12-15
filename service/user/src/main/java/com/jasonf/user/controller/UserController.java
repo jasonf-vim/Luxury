@@ -19,6 +19,11 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    @GetMapping("/login/{username}")
+    public User findUser(@PathVariable("username") String username) {
+        return userService.findById(username);
+    }
+
     /**
      * 查询全部数据
      *
