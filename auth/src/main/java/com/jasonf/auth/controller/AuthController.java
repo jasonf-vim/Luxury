@@ -6,10 +6,8 @@ import com.jasonf.entity.Result;
 import com.jasonf.entity.StatusCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
@@ -48,7 +46,8 @@ public class AuthController {
     }
 
     @GetMapping("toLogin")
-    public String toLogin() {
+    public String toLogin(@RequestParam(value = "from", required = false) String origin, Model model) {
+        model.addAttribute("origin", origin);
         return "login";
     }
 }

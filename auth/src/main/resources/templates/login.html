@@ -171,7 +171,8 @@
         data: {
             username: "",
             password: "",
-            msg: ""
+            msg: "",
+            origin: [[${origin}]]
         },
         methods: {
             login: function () {
@@ -179,6 +180,7 @@
                 axios.post("/api/auth/login?username=" + app.username + "&password=" + app.password).then(function (response) {
                     if (response.data.flag) {
                         app.msg = "登录成功";
+                        location.href = app.origin;
                     } else {
                         app.msg = "登录失败";
                     }

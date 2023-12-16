@@ -33,6 +33,20 @@ spring:
             - Path=/api/auth/**
           filters:
             - StripPrefix=1
+          #认证微服务
+        - id: order_route
+          uri: lb://order
+          predicates:
+            - Path=/api/cart/**,/api/cart
+          filters:
+            - StripPrefix=1
+          # 购物车渲染
+        - id: order_web_route
+          uri: lb://order-web
+          predicates:
+            - Path=/api/wcart/**,/api/worder/**
+          filters:
+            - StripPrefix=1
   redis:
     host: 192.168.200.128
 server:

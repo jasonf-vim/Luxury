@@ -11,4 +11,7 @@ import java.util.List;
 public interface SkuFeign {
     @GetMapping("sku/spu/{spuId}")
     List<Sku> findSkuListBySpuId(@PathVariable("spuId") String spuId);
+
+    @GetMapping("sku/find/{id}")
+    Sku find(@PathVariable String id);
 }

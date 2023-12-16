@@ -42,6 +42,11 @@ public class SkuController {
         return new Result(true, StatusCode.OK, "查询成功", sku);
     }
 
+    @GetMapping("find/{id}")
+    public Sku find(@PathVariable String id) {
+        return skuService.findById(id);
+    }
+
 
     /***
      * 新增数据

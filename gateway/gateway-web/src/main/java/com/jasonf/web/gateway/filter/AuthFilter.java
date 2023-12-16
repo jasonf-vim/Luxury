@@ -22,26 +22,27 @@ public class AuthFilter implements GlobalFilter, Ordered {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    private static final String LOGIN_PAGE_URL = "http://localhost:8001/api/auth/toLogin";
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
+        String uri = request.getURI().getPath();
         // 登录业务：放行
-        if (!UrlUtil.requireAuthorize(request.getURI().getPath())) {
+        if (!UrlUtil.requireAuthorize(uri)) {
             return chain.filter(exchange);
         }
         // 没有响应的cookie，拒绝
         MultiValueMap<String, HttpCookie> cookies = request.getCookies();
         HttpCookie jti = cookies.getFirst("uid");
         if (jti == null) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return response.setComplete();
+            return toLoginPage(response, LOGIN_PAGE_URL + "?from=" + uri);
         }
         // redis缓存中查询不到相应的jti，拒绝
         String jwt = stringRedisTemplate.opsForValue().get(jti.getValue());
         if (StringUtils.isEmpty(jwt)) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return response.setComplete();
+            return toLoginPage(response, LOGIN_PAGE_URL + "?from=" + uri);
         }
         // 拼接 jwt 到请求头中
         request.mutate().header("Authorization", "Bearer " + jwt);  // 由微服务判断是否合法
@@ -51,5 +52,11 @@ public class AuthFilter implements GlobalFilter, Ordered {
     @Override
     public int getOrder() {
         return 0;
+    }
+
+    private Mono<Void> toLoginPage(ServerHttpResponse response, String loginPageUrl) {
+        response.setStatusCode(HttpStatus.SEE_OTHER);
+        response.getHeaders().set("Location", loginPageUrl);
+        return response.setComplete();
     }
 }
