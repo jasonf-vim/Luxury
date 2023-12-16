@@ -1,7 +1,7 @@
 package com.jasonf.goods.service;
 
-import com.jasonf.goods.pojo.Sku;
 import com.github.pagehelper.Page;
+import com.jasonf.goods.pojo.Sku;
 
 import java.util.List;
 import java.util.Map;
@@ -69,4 +69,11 @@ public interface SkuService {
      * @return
      */
     Page<Sku> findPage(Map<String, Object> searchMap, int page, int size);
+
+    /**
+     * 减库存
+     *
+     * @param username
+     */
+    void decrCount(String username);
 }

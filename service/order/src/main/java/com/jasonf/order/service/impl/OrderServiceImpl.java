@@ -2,13 +2,20 @@ package com.jasonf.order.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.jasonf.goods.feign.SkuFeign;
+import com.jasonf.order.dao.OrderItemMapper;
 import com.jasonf.order.dao.OrderMapper;
 import com.jasonf.order.pojo.Order;
+import com.jasonf.order.pojo.OrderItem;
+import com.jasonf.order.service.CartService;
 import com.jasonf.order.service.OrderService;
+import com.jasonf.utils.IdWorker;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +23,23 @@ import java.util.Map;
 public class OrderServiceImpl implements OrderService {
     @Resource
     private OrderMapper orderMapper;
+
+    @Resource
+    private CartService cartService;
+
+    @Resource
+    private IdWorker idWorker;
+
+    @Resource
+    private OrderItemMapper orderItemMapper;
+
+    private static final String CART = "cart:";
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private SkuFeign skuFeign;
 
     /**
      * 查询全部列表
@@ -40,13 +64,40 @@ public class OrderServiceImpl implements OrderService {
 
 
     /**
-     * 增加
+     * 下订单
      *
      * @param order
      */
     @Override
-    public void add(Order order) {
-        orderMapper.insert(order);
+    public boolean add(Order order) {
+        // 购物车信息
+        Map cartMap = cartService.list(order.getUsername());
+        // tb_order表记录数据
+        String orderId = Long.toString(idWorker.nextId());
+        order.setId(orderId);
+        order.setTotalNum((Integer) cartMap.get("totalNum"));
+        order.setTotalMoney((Integer) cartMap.get("totalMoney"));
+        order.setCreateTime(new Date());
+        order.setUpdateTime(new Date());
+        order.setBuyerRate("1");
+        order.setSourceType("1");
+        order.setOrderStatus("0");  // 下单状态
+        order.setPayStatus("0");    // 未支付
+        order.setConsignStatus("0");    // 未发货
+        order.setIsDelete("0"); // 未删除
+        orderMapper.insertSelective(order);
+        // tb_order_item表记录数据
+        List<OrderItem> orderItems = (List<OrderItem>) cartMap.get("orderItems");
+        for (OrderItem orderItem : orderItems) {
+            orderItem.setOrderId(orderId);
+            orderItemMapper.insertSelective(orderItem);
+        }
+        // 扣减库存
+        skuFeign.decrCount(order.getUsername());
+
+        // 删除购物车信息
+        stringRedisTemplate.delete(CART + order.getUsername());
+        return true;
     }
 
 

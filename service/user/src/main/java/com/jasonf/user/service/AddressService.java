@@ -69,4 +69,12 @@ public interface AddressService {
      * @return
      */
     Page<Address> findPage(Map<String, Object> searchMap, int page, int size);
+
+    /**
+     * 根据用户名查找所有的地址
+     *
+     * @param username
+     * @return
+     */
+    List<Address> findAddrs(String username);
 }

@@ -27,7 +27,7 @@ public interface OrderService {
      *
      * @param order
      */
-    void add(Order order);
+    boolean add(Order order);
 
     /**
      * 修改

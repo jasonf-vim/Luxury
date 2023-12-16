@@ -1,5 +1,6 @@
 package com.jasonf;
 
+import com.jasonf.interceptor.FeignInterceptor;
 import com.jasonf.order.config.TokenDecode;
 import com.jasonf.utils.IdWorker;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,5 +34,10 @@ public class OrderApplication {
     @Bean
     public TokenDecode tokenDecode() {
         return new TokenDecode();
+    }
+
+    @Bean
+    public FeignInterceptor feignInterceptor() {
+        return new FeignInterceptor();
     }
 }

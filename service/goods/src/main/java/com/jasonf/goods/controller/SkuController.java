@@ -120,4 +120,10 @@ public class SkuController {
         }   // 非初始入库
         return skuService.findList(condition);
     }
+
+    @PutMapping("/decr/count")
+    public Result decrCount(@RequestParam("username") String username) {
+        skuService.decrCount(username);
+        return new Result(true, StatusCode.OK, "库存修改成功");
+    }
 }

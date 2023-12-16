@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.jasonf.entity.PageResult;
 import com.jasonf.entity.Result;
 import com.jasonf.entity.StatusCode;
+import com.jasonf.order.config.TokenDecode;
 import com.jasonf.order.pojo.Order;
 import com.jasonf.order.service.OrderService;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,9 @@ import java.util.Map;
 public class OrderController {
     @Resource
     private OrderService orderService;
+
+    @Resource
+    private TokenDecode tokenDecode;
 
     /**
      * 查询全部数据
@@ -49,6 +53,8 @@ public class OrderController {
      */
     @PostMapping
     public Result add(@RequestBody Order order) {
+        String username = tokenDecode.getUserInfo().get("username");
+        order.setUsername(username);
         orderService.add(order);
         return new Result(true, StatusCode.OK, "添加成功");
     }

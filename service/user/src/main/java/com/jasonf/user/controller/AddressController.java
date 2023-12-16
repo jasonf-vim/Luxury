@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.jasonf.entity.PageResult;
 import com.jasonf.entity.Result;
 import com.jasonf.entity.StatusCode;
+import com.jasonf.user.config.TokenDecode;
 import com.jasonf.user.pojo.Address;
 import com.jasonf.user.service.AddressService;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,9 @@ import java.util.Map;
 public class AddressController {
     @Resource
     private AddressService addressService;
+
+    @Resource
+    private TokenDecode tokenDecode;
 
     /**
      * 查询全部数据
@@ -103,5 +107,10 @@ public class AddressController {
         Page<Address> pageList = addressService.findPage(searchMap, page, size);
         PageResult pageResult = new PageResult(pageList.getTotal(), pageList.getResult());
         return new Result(true, StatusCode.OK, "查询成功", pageResult);
+    }
+
+    @GetMapping("list")
+    public List<Address> list() {
+        return addressService.findAddrs(tokenDecode.getUserInfo().get("username"));
     }
 }

@@ -1,10 +1,13 @@
 package com.jasonf.goods.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jasonf.goods.dao.SkuMapper;
 import com.jasonf.goods.pojo.Sku;
 import com.jasonf.goods.service.SkuService;
+import com.jasonf.order.pojo.OrderItem;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -14,8 +17,13 @@ import java.util.Map;
 
 @Service
 public class SkuServiceImpl implements SkuService {
+    private static final String CART = "cart:";
+
     @Resource
     private SkuMapper skuMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 查询全部列表
@@ -109,6 +117,18 @@ public class SkuServiceImpl implements SkuService {
         PageHelper.startPage(page, size);
         Example example = createExample(searchMap);
         return (Page<Sku>) skuMapper.selectByExample(example);
+    }
+
+    @Override
+    public void decrCount(String username) {
+        List<Object> values = stringRedisTemplate.opsForHash().values(CART + username);
+        for (Object value : values) {
+            OrderItem orderItem = JSON.parseObject((String) value, OrderItem.class);
+            int rows = skuMapper.decrCount(orderItem);
+            if (rows != 1) {
+                throw new RuntimeException("库存扣减失败, skuId: " + orderItem.getSkuId() + "; orderId: " + orderItem.getOrderId());
+            }
+        }
     }
 
     /**
