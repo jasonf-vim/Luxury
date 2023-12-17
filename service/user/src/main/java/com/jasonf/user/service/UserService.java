@@ -1,7 +1,8 @@
 package com.jasonf.user.service;
 
-import com.jasonf.user.pojo.User;
 import com.github.pagehelper.Page;
+import com.jasonf.order.pojo.Task;
+import com.jasonf.user.pojo.User;
 
 import java.util.List;
 import java.util.Map;
@@ -69,4 +70,12 @@ public interface UserService {
      * @return
      */
     Page<User> findPage(Map<String, Object> searchMap, int page, int size);
+
+    /**
+     * 更新用户积分
+     *
+     * @param task
+     * @return
+     */
+    int updatePoint(Task task);
 }

@@ -1,11 +1,16 @@
 package com.jasonf.user.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.jasonf.order.pojo.Task;
+import com.jasonf.user.dao.PointLogMapper;
 import com.jasonf.user.dao.UserMapper;
+import com.jasonf.user.pojo.PointLog;
 import com.jasonf.user.pojo.User;
 import com.jasonf.user.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
@@ -16,6 +21,9 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private PointLogMapper pointLogMapper;
 
     /**
      * 查询全部列表
@@ -109,6 +117,27 @@ public class UserServiceImpl implements UserService {
         PageHelper.startPage(page, size);
         Example example = createExample(searchMap);
         return (Page<User>) userMapper.selectByExample(example);
+    }
+
+    @Override
+    @Transactional
+    public int updatePoint(Task task) {
+        Map request = JSON.parseObject(task.getRequestBody(), Map.class);
+        // 添加积分
+        int rows = userMapper.updatePoint((Integer) request.get("point"), (String) request.get("user_id"));
+        if (rows != 1) {
+            throw new RuntimeException("添加积分失败 task_id: " + task.getId() + "; user_name: " + request.get("user_id"));
+        }
+        // 记录日志
+        PointLog pointLog = new PointLog();
+        pointLog.setOrderId(Long.toString(task.getId()));
+        pointLog.setUserId((String) request.get("user_id"));
+        pointLog.setPoint((Integer) request.get("point"));
+        rows = pointLogMapper.insertSelective(pointLog);
+        if (rows != 1) {
+            throw new RuntimeException("添加日志失败 task_id: " + task.getId() + "; user_name: " + request.get("user_id"));
+        }
+        return 0;
     }
 
     /**

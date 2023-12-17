@@ -1,21 +1,27 @@
 package com.jasonf.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jasonf.goods.feign.SkuFeign;
+import com.jasonf.order.config.RabbitMQConfig;
 import com.jasonf.order.dao.OrderItemMapper;
 import com.jasonf.order.dao.OrderMapper;
+import com.jasonf.order.dao.TaskMapper;
 import com.jasonf.order.pojo.Order;
 import com.jasonf.order.pojo.OrderItem;
+import com.jasonf.order.pojo.Task;
 import com.jasonf.order.service.CartService;
 import com.jasonf.order.service.OrderService;
 import com.jasonf.utils.IdWorker;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +46,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private SkuFeign skuFeign;
+
+    @Resource
+    private TaskMapper taskMapper;
 
     /**
      * 查询全部列表
@@ -69,6 +78,7 @@ public class OrderServiceImpl implements OrderService {
      * @param order
      */
     @Override
+    @Transactional  // 本地事务
     public boolean add(Order order) {
         // 购物车信息
         Map cartMap = cartService.list(order.getUsername());
@@ -97,6 +107,19 @@ public class OrderServiceImpl implements OrderService {
 
         // 删除购物车信息
         stringRedisTemplate.delete(CART + order.getUsername());
+
+        // 添加积分 (分布式事务)
+        Task task = new Task();
+        task.setCreateTime(new Date());
+        task.setUpdateTime(new Date());
+        task.setMqExchange(RabbitMQConfig.EX_BUYING_ADDPOINTUSER);
+        task.setMqRoutingkey(RabbitMQConfig.CG_BUYING_ADDPOINT_KEY);
+        Map<String, Object> request = new HashMap<>();
+        request.put("order_id", orderId);
+        request.put("user_id", order.getUsername());
+        request.put("point", order.getTotalMoney());
+        task.setRequestBody(JSON.toJSONString(request));
+        taskMapper.insertSelective(task);
         return true;
     }
 
