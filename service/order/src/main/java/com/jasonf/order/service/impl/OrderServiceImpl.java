@@ -15,7 +15,9 @@ import com.jasonf.order.pojo.OrderLog;
 import com.jasonf.order.pojo.Task;
 import com.jasonf.order.service.CartService;
 import com.jasonf.order.service.OrderService;
+import com.jasonf.pay.feign.PayFeign;
 import com.jasonf.utils.IdWorker;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private OrderLogMapper orderLogMapper;
+
+    @Resource
+    private PayFeign payFeign;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 查询全部列表
@@ -125,6 +133,9 @@ public class OrderServiceImpl implements OrderService {
         request.put("point", order.getTotalMoney());
         task.setRequestBody(JSON.toJSONString(request));
         taskMapper.insertSelective(task);
+
+        // 往延迟队列放置消息, 校验支付结果
+        rabbitTemplate.convertAndSend("", "queue.ordercreate", orderId);
         return orderId;
     }
 
@@ -213,6 +224,49 @@ public class OrderServiceImpl implements OrderService {
             orderLog.setConsignStatus("0");     // 未发货
             orderLog.setRemarks("微信支付, 流水号：" + transactionId);
             orderLogMapper.insertSelective(orderLog);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void closeOrder(String orderId) {
+        // 验证orderId
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            throw new RuntimeException("订单: " + orderId + " 不存在");
+        }
+        if (!"0".equals(order.getOrderStatus())) {
+            return;     // 无需处理
+        }
+        Map<String, String> queryMap = payFeign.queryOrder(orderId).getData();
+        if (queryMap.get("trade_state") != null || "SUCCESS".equals(queryMap.get("trade_state"))) {    // 订单已支付
+            updatePayStatus(orderId, queryMap.get("transaction_id"));
+            return;
+        }
+        if ("NOTPAY".equals(queryMap.get("trade_state"))) {
+            // 关闭微信订单
+            payFeign.closeOrder(orderId);
+            // 关闭用户订单
+            order.setOrderStatus("9");      // 关闭订单
+            order.setCloseTime(new Date());
+            orderMapper.updateByPrimaryKeySelective(order);
+            // 记录关闭日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setOrderId(Long.toString(idWorker.nextId()));
+            orderLog.setOperator("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderId(orderId);
+            orderLog.setOrderStatus("9");
+            orderLog.setPayStatus("0");
+            orderLog.setConsignStatus("0");     // 未发货
+            orderLog.setRemarks("超时未支付");
+            orderLogMapper.insertSelective(orderLog);
+            // 回滚库存
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderId(orderId);
+            for (OrderItem item : orderItemMapper.select(orderItem)) {
+                skuFeign.rollback(item.getSkuId(), item.getNum());
+            }
         }
     }
 

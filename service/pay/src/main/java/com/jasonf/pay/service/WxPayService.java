@@ -12,5 +12,7 @@ public interface WxPayService {
      */
     Map nativePay(String orderId, Integer money);
 
-    Map orderQuery(String orderId);
+    Map<String, String> orderQuery(String orderId);
+
+    Map<String, String> closeOrder(String orderId);
 }

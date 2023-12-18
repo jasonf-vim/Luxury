@@ -20,4 +20,7 @@ public interface SkuFeign {
 
     @PutMapping("sku/decr/count")
     Result decrCount(@RequestParam("username") String username);
+
+    @PutMapping("sku/rollback")
+    Result rollback(@RequestParam("skuId") String skuId, @RequestParam("num") Integer num);
 }

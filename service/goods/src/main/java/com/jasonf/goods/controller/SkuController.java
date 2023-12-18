@@ -126,4 +126,10 @@ public class SkuController {
         skuService.decrCount(username);
         return new Result(true, StatusCode.OK, "库存修改成功");
     }
+
+    @PutMapping("/rollback")
+    public Result rollback(@RequestParam("skuId") String skuId, @RequestParam("num") Integer num) {
+        skuService.rollback(skuId, num);
+        return new Result(true, StatusCode.OK, "库存回滚成功");
+    }
 }

@@ -39,11 +39,23 @@ public class WxPayServiceImpl implements WxPayService {
     }
 
     @Override
-    public Map orderQuery(String orderId) {
+    public Map<String, String> orderQuery(String orderId) {
         try {
             Map<String, String> reqData = new HashMap<>();
             reqData.put("out_trade_no", orderId);
             return wxPay.orderQuery(reqData);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Map<String, String> closeOrder(String orderId) {
+        try {
+            Map<String, String> reqData = new HashMap<>();
+            reqData.put("out_trade_no", orderId);
+            return wxPay.closeOrder(reqData);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

@@ -131,6 +131,11 @@ public class SkuServiceImpl implements SkuService {
         }
     }
 
+    @Override
+    public void rollback(String skuId, Integer num) {
+        skuMapper.rollback(skuId, num);
+    }
+
     /**
      * 构建查询对象
      *

@@ -76,4 +76,6 @@ public interface SkuService {
      * @param username
      */
     void decrCount(String username);
+
+    void rollback(String skuId, Integer num);
 }

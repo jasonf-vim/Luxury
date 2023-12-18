@@ -8,10 +8,7 @@ import com.jasonf.pay.config.RabbitMQConfig;
 import com.jasonf.pay.service.WxPayService;
 import com.jasonf.utils.ConvertUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -59,5 +56,17 @@ public class WxPayController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    @PutMapping("close/{orderId}")
+    public Result<Map<String, String>> closeOrder(@PathVariable("orderId") String orderId) {
+        Map<String, String> map = wxPayService.closeOrder(orderId);
+        return new Result<>(true, StatusCode.OK, "订单关闭成功", map);
+    }
+
+    @GetMapping("query{orderId}")
+    public Result<Map<String, String>> queryOrder(@PathVariable("orderId") String orderId) {
+        Map<String, String> map = wxPayService.orderQuery(orderId);
+        return new Result<>(true, StatusCode.OK, "订单查询成功", map);
     }
 }

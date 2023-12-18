@@ -74,4 +74,9 @@ public interface OrderService {
      * 更新订单状态
      */
     void updatePayStatus(String orderId, String transactionId);
+
+    /**
+     * 关闭订单
+     */
+    void closeOrder(String orderId);
 }
