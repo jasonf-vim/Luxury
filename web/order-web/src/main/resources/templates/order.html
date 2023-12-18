@@ -340,7 +340,8 @@
             add: function () {
                 axios.post('/api/worder/add', this.order).then(function (resp) {
                     if (resp.data.flag) {
-                        alert("下单成功")
+                        var orderId = resp.data.data
+                        location.href = "/api/worder/toPayPage?orderId=" + orderId;
                     } else {
                         alert("下单失败")
                     }

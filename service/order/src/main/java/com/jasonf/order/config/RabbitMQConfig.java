@@ -52,5 +52,12 @@ public class RabbitMQConfig {
     public Binding BINDING_CG_BUYING_FINISHADDPOINT(@Qualifier(CG_BUYING_FINISHADDPOINT) Queue queue, @Qualifier(EX_BUYING_ADDPOINTUSER) Exchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(CG_BUYING_FINISHADDPOINT_KEY).noargs();
     }
+
+    public static final String ORDER_PAY = "order_pay";
+
+    @Bean
+    public Queue queue() {
+        return new Queue(ORDER_PAY);
+    }
 }
 

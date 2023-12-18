@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableEurekaClient
-@EnableFeignClients(basePackages = {"com.jasonf.order.feign", "com.jasonf.user.feign"})
+@EnableFeignClients(basePackages = {"com.jasonf.order.feign", "com.jasonf.user.feign", "com.jasonf.pay.feign"})
 public class OrderWebApplication {
     public static void main(String[] args) {
         SpringApplication.run(OrderWebApplication.class, args);

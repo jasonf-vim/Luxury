@@ -6,10 +6,12 @@ import com.github.pagehelper.PageHelper;
 import com.jasonf.goods.feign.SkuFeign;
 import com.jasonf.order.config.RabbitMQConfig;
 import com.jasonf.order.dao.OrderItemMapper;
+import com.jasonf.order.dao.OrderLogMapper;
 import com.jasonf.order.dao.OrderMapper;
 import com.jasonf.order.dao.TaskMapper;
 import com.jasonf.order.pojo.Order;
 import com.jasonf.order.pojo.OrderItem;
+import com.jasonf.order.pojo.OrderLog;
 import com.jasonf.order.pojo.Task;
 import com.jasonf.order.service.CartService;
 import com.jasonf.order.service.OrderService;
@@ -50,6 +52,9 @@ public class OrderServiceImpl implements OrderService {
     @Resource
     private TaskMapper taskMapper;
 
+    @Resource
+    private OrderLogMapper orderLogMapper;
+
     /**
      * 查询全部列表
      *
@@ -79,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional  // 本地事务
-    public boolean add(Order order) {
+    public String add(Order order) {
         // 购物车信息
         Map cartMap = cartService.list(order.getUsername());
         // tb_order表记录数据
@@ -120,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
         request.put("point", order.getTotalMoney());
         task.setRequestBody(JSON.toJSONString(request));
         taskMapper.insertSelective(task);
-        return true;
+        return orderId;
     }
 
 
@@ -183,6 +188,32 @@ public class OrderServiceImpl implements OrderService {
         PageHelper.startPage(page, size);
         Example example = createExample(searchMap);
         return (Page<Order>) orderMapper.selectByExample(example);
+    }
+
+    @Override
+    @Transactional
+    public void updatePayStatus(String orderId, String transactionId) {
+        // 查询订单状态
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order != null && "0".equals(order.getPayStatus())) {    // 订单存在且未支付
+            order.setPayStatus("1");    // 已支付
+            order.setOrderStatus("1");  // 订单到达已支付阶段
+            order.setTransactionId(transactionId);
+            order.setPayTime(new Date());
+            order.setUpdateTime(new Date());
+            orderMapper.insertSelective(order);
+            // 记录订单变更历史
+            OrderLog orderLog = new OrderLog();
+            orderLog.setOrderId(Long.toString(idWorker.nextId()));
+            orderLog.setOperator("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderId(orderId);
+            orderLog.setOrderStatus("1");
+            orderLog.setPayStatus("1");
+            orderLog.setConsignStatus("0");     // 未发货
+            orderLog.setRemarks("微信支付, 流水号：" + transactionId);
+            orderLogMapper.insertSelective(orderLog);
+        }
     }
 
     /**

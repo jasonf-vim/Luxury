@@ -55,8 +55,8 @@ public class OrderController {
     public Result add(@RequestBody Order order) {
         String username = tokenDecode.getUserInfo().get("username");
         order.setUsername(username);
-        orderService.add(order);
-        return new Result(true, StatusCode.OK, "添加成功");
+        String orderId = orderService.add(order);
+        return new Result(true, StatusCode.OK, "添加成功", orderId);
     }
 
 

@@ -19,6 +19,7 @@
         <module>system-api</module>
         <module>user-api</module>
         <module>search-api</module>
+        <module>pay-api</module>
     </modules>
 
     <properties>

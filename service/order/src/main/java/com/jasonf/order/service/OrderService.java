@@ -27,7 +27,7 @@ public interface OrderService {
      *
      * @param order
      */
-    boolean add(Order order);
+    String add(Order order);
 
     /**
      * 修改
@@ -69,4 +69,9 @@ public interface OrderService {
      * @return
      */
     Page<Order> findPage(Map<String, Object> searchMap, int page, int size);
+
+    /**
+     * 更新订单状态
+     */
+    void updatePayStatus(String orderId, String transactionId);
 }

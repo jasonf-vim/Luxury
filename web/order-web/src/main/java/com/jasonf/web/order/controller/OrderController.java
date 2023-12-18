@@ -55,4 +55,12 @@ public class OrderController {
     public Result add(@RequestBody Order order) {
         return orderFeign.add(order);
     }
+
+    @GetMapping("/toPayPage")
+    public String toPayPage(String orderId, Model model) {
+        model.addAttribute("orderId", orderId);
+        Order order = (Order) orderFeign.findById(orderId).getData();
+        model.addAttribute("payMoney", order.getPayMoney());
+        return "pay";
+    }
 }

@@ -21,6 +21,7 @@
         <module>file</module>
         <module>search</module>
         <module>page</module>
+        <module>pay</module>
     </modules>
 
     <properties>
