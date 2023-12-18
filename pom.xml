@@ -18,6 +18,7 @@
         <module>common-db</module>
         <module>canal</module>
         <module>auth</module>
+        <module>task</module>
     </modules>
 
     <parent>

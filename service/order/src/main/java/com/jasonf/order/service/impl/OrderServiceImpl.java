@@ -5,18 +5,13 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.jasonf.goods.feign.SkuFeign;
 import com.jasonf.order.config.RabbitMQConfig;
-import com.jasonf.order.dao.OrderItemMapper;
-import com.jasonf.order.dao.OrderLogMapper;
-import com.jasonf.order.dao.OrderMapper;
-import com.jasonf.order.dao.TaskMapper;
-import com.jasonf.order.pojo.Order;
-import com.jasonf.order.pojo.OrderItem;
-import com.jasonf.order.pojo.OrderLog;
-import com.jasonf.order.pojo.Task;
+import com.jasonf.order.dao.*;
+import com.jasonf.order.pojo.*;
 import com.jasonf.order.service.CartService;
 import com.jasonf.order.service.OrderService;
 import com.jasonf.pay.feign.PayFeign;
 import com.jasonf.utils.IdWorker;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -24,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +58,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private RabbitTemplate rabbitTemplate;
+
+    @Resource
+    private OrderConfigMapper orderConfigMapper;
 
     /**
      * 查询全部列表
@@ -268,6 +267,93 @@ public class OrderServiceImpl implements OrderService {
                 skuFeign.rollback(item.getSkuId(), item.getNum());
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public void batchSend(List<Order> orders) {
+        // 物流信息校验
+        for (Order order : orders) {
+            if (order.getId() == null) {
+                throw new RuntimeException("订单ID为空");
+            } else if (order.getShippingName() == null || order.getShippingCode() == null) {
+                throw new RuntimeException("物流信息为空");
+            }
+        }
+        // 订单状态校验
+        for (Order order : orders) {
+            Order queryOrder = orderMapper.selectByPrimaryKey(order.getId());
+            if (!"1".equals(queryOrder.getOrderStatus()) || !"0".equals(queryOrder.getConsignStatus())) {
+                throw new RuntimeException("订单状态异常");
+            }
+        }
+        // 批量发货
+        for (Order order : orders) {
+            order.setOrderStatus("2");  // 设为已发货
+            order.setConsignStatus("1");
+            order.setConsignTime(new Date());
+            order.setUpdateTime(new Date());
+            orderMapper.insertSelective(order);
+            // 记录日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setOrderId(Long.toString(idWorker.nextId()));
+            orderLog.setOperator("admin");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderId(order.getId());
+            orderLog.setOrderStatus("2");
+            orderLog.setPayStatus("1");
+            orderLog.setConsignStatus("1");     // 已发货
+            orderLog.setRemarks("订单已发货");
+            orderLogMapper.insertSelective(orderLog);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void take(String orderId, String operator) {
+        if (StringUtils.isBlank(orderId)) {
+            throw new RuntimeException("订单号为空");
+        }
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        // 修改order属性
+        if (!"1".equals(order.getConsignStatus())) {
+            throw new RuntimeException("物流信息异常");
+        }
+        order.setConsignStatus("2");
+        order.setOrderStatus("3");
+        order.setUpdateTime(new Date());
+        order.setEndTime(new Date());
+        orderMapper.insertSelective(order);
+        // 记录日志
+        OrderLog orderLog = new OrderLog();
+        orderLog.setOrderId(Long.toString(idWorker.nextId()));
+        orderLog.setOperator(operator);
+        orderLog.setOperateTime(new Date());
+        orderLog.setOrderId(order.getId());
+        orderLog.setOrderStatus("3");
+        orderLog.setPayStatus("1");
+        orderLog.setConsignStatus("2");     // 已收货
+        orderLog.setRemarks("订单已收货");
+        orderLogMapper.insertSelective(orderLog);
+    }
+
+    @Override
+    public void autoTake() {
+        // 筛选 发货 超过期限的订单
+        OrderConfig orderConfig = orderConfigMapper.selectByPrimaryKey("1");
+        Integer timeout = orderConfig.getTakeTimeout();
+        LocalDate now = LocalDate.now();
+        LocalDate date = now.plusDays(-timeout);    // 时间往前推
+        Example example = new Example(Order.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("orderStatus", "2");
+        criteria.andLessThanOrEqualTo("consignTime", date);
+        List<Order> orders = orderMapper.selectByExample(example);
+        // 遍历并自动收货
+        orders.forEach(order -> take(order.getId(), "system"));
     }
 
     /**

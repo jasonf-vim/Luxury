@@ -110,4 +110,17 @@ public class OrderController {
         PageResult pageResult = new PageResult(pageList.getTotal(), pageList.getResult());
         return new Result(true, StatusCode.OK, "查询成功", pageResult);
     }
+
+    @PostMapping("batchSend")
+    public Result batchSend(@RequestBody List<Order> orders) {
+        orderService.batchSend(orders);
+        return new Result(true, StatusCode.OK, "批量发货成功");
+    }
+
+    // 确认收货
+    @PutMapping("take/{orderId}/operator/{operator}")
+    public Result take(@PathVariable("orderId") String orderId, @PathVariable("operator") String operator) {
+        orderService.take(orderId, operator);
+        return new Result(true, StatusCode.OK, "已确认收货");
+    }
 }
