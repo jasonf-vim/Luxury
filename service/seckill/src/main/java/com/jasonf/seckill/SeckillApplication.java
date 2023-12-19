@@ -1,5 +1,6 @@
 package com.jasonf.seckill;
 
+import com.jasonf.seckill.config.TokenDecode;
 import com.jasonf.utils.IdWorker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -31,6 +32,11 @@ public class SeckillApplication {
     @Bean
     public SimpleDateFormat simpleDateFormat() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    }
+
+    @Bean
+    public TokenDecode tokenDecode() {
+        return new TokenDecode();
     }
 
     //设置redisTemplate的序列化

@@ -18,6 +18,8 @@ import java.util.Set;
 public class SeckillGoodsPushTask {
     private static final String SECKILL_GOODS_KEY = "seckill:goods:";
 
+    private static final String SECKILL_GOODS_STOCK_KEY = "seckill:goods:stock:";
+
     @Resource
     private SeckillGoodsMapper seckillGoodsMapper;
 
@@ -48,6 +50,8 @@ public class SeckillGoodsPushTask {
             List<SeckillGoods> seckillGoods = seckillGoodsMapper.selectByExample(example);
             for (SeckillGoods seckillGood : seckillGoods) {
                 redisTemplate.opsForHash().put(key, seckillGood.getId(), seckillGood);
+                redisTemplate.opsForValue().set(SECKILL_GOODS_STOCK_KEY + seckillGood.getId(),
+                        seckillGood.getStockCount());
             }
         }
     }

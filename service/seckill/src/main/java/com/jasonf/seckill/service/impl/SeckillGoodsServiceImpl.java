@@ -12,11 +12,20 @@ import java.util.List;
 public class SeckillGoodsServiceImpl implements SeckillGoodsService {
     private static final String SECKILL_GOODS_KEY = "seckill:goods:";
 
+    private static final String SECKILL_GOODS_STOCK_KEY = "seckill:goods:stock:";
+
     @Resource
     private RedisTemplate redisTemplate;
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<SeckillGoods> list(String time) {   // time: 20231203
-        return (List<SeckillGoods>) redisTemplate.opsForHash().values(SECKILL_GOODS_KEY + time);
+        List<SeckillGoods> goodsList = (List<SeckillGoods>) redisTemplate.opsForHash().values(SECKILL_GOODS_KEY + time);
+        // 获取实时库存
+        goodsList.forEach(goods -> {
+            String stock = (String) redisTemplate.opsForValue().get(SECKILL_GOODS_STOCK_KEY + goods.getId());
+            goods.setStockCount(Integer.parseInt(stock));
+        });
+        return goodsList;
     }
 }

@@ -40,6 +40,6 @@ public class SeckillGoodsController {
     @ResponseBody
     public Result list(@RequestParam("time") String time) {
         String timeStr = DateUtil.formatStr(time);  // 时间格式转换
-        return seckillFeign.list(time);
+        return seckillFeign.list(timeStr);
     }
 }

@@ -4,6 +4,7 @@ import com.jasonf.entity.Result;
 import com.jasonf.seckill.pojo.SeckillGoods;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -12,4 +13,7 @@ import java.util.List;
 public interface SeckillFeign {
     @GetMapping("/seckillgoods/list")
     Result<List<SeckillGoods>> list(@RequestParam("time") String time);
+
+    @PostMapping("seckillorder/add")
+    boolean add(@RequestParam("time") String time, @RequestParam("id") Long id);
 }

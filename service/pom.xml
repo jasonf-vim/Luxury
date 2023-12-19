@@ -23,6 +23,7 @@
         <module>page</module>
         <module>pay</module>
         <module>seckill</module>
+        <module>consume</module>
     </modules>
 
     <properties>
