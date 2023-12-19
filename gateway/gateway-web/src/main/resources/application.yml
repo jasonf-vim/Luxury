@@ -33,7 +33,7 @@ spring:
             - Path=/api/auth/**
           filters:
             - StripPrefix=1
-          #认证微服务
+          #订单微服务
         - id: order_route
           uri: lb://order
           predicates:
@@ -45,6 +45,20 @@ spring:
           uri: lb://order-web
           predicates:
             - Path=/api/wcart/**,/api/worder/**,/api/wxpay/**
+          filters:
+            - StripPrefix=1
+          # 秒杀微服务
+        - id: seckill_route
+          uri: lb://seckill
+          predicates:
+            - Path=/api/seckill/**
+          filters:
+            - StripPrefix=1
+          # 秒杀微服务
+        - id: seckill_web_route
+          uri: lb://seckill-web
+          predicates:
+            - Path=/api/wseckillgoods/**,/api/wseckillorder/**
           filters:
             - StripPrefix=1
   redis:

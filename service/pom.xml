@@ -22,6 +22,7 @@
         <module>search</module>
         <module>page</module>
         <module>pay</module>
+        <module>seckill</module>
     </modules>
 
     <properties>

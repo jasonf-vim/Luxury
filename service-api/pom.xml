@@ -20,6 +20,7 @@
         <module>user-api</module>
         <module>search-api</module>
         <module>pay-api</module>
+        <module>seckill-api</module>
     </modules>
 
     <properties>
